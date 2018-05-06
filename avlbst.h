@@ -13,6 +13,8 @@ class avlBST {
 
 public:
 
+    typedef void (avlBST::*fptr)(node*, int, std::vector<std::pair<size_t, int>>);
+
     avlBST();
     ~avlBST();
     avlBST(const avlBST &other);
@@ -34,6 +36,10 @@ private:
 
     void copy(const avlBST &other);
     void deleteAll();
+
+    void insertRoot(node &temp);
+    void insertLeft(node &temp, const int &index);
+    void insertRight(node &temp, const int &index);
 
     void rebalance();
 };

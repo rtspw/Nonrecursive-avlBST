@@ -35,19 +35,18 @@ size_t avlBST::size() {
 void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx, const size_t count) {  // Concerns : vector.push_back creates copy; replace if with function pointer
     node temp(w, pIdx, lIdx, count);
     if(empty()) {
-        tree.push_back(temp);
-        leftIdxs.push_back(-1);
-        rightIdxs.push_back(-1);
-        parentIdxs.push_back(-1);
+        insertRoot(temp);
     }
     else {
         bool notBreak = true;
         bool useLog = true;
+        bool createsNewDepth = false;
         int index = 0;
         std::vector<std::pair<size_t, int>> balanceLog;
 
         /* Iterates down the tree, along with changing the balance of the nodes accordingly */
         while(notBreak) {
+
 
             /* Case 1: Add to word count if character already exists */
             if(temp.word == tree[index].word) {
@@ -62,11 +61,9 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
             else if(temp.word < tree[index].word) {
                 balanceLog.push_back(std::make_pair(index, -1));
                 if(leftIdxs[index] == -1) {
-                    leftIdxs[index] = (tree.size()); // size refers to index of the inserted node
-                    leftIdxs.push_back(-1);
-                    rightIdxs.push_back(-1);
-                    parentIdxs.push_back(index);
-                    tree.push_back(temp);
+                    if(rightIdxs[index] == -1)
+                        createsNewDepth = true;
+                    insertLeft(temp, index);
                     notBreak = false;
                 }
                 else
@@ -77,11 +74,9 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
             else {
                 balanceLog.push_back(std::make_pair(index, 1));
                 if(rightIdxs[index] == -1) {
-                    rightIdxs[index] = (tree.size());
-                    leftIdxs.push_back(-1);
-                    rightIdxs.push_back(-1);
-                    parentIdxs.push_back(index);
-                    tree.push_back(temp);
+                    if(leftIdxs[index] == -1)
+                        createsNewDepth = true;
+                    insertRight(temp, index);
                     notBreak = false;
                 }
                 else
@@ -90,12 +85,18 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
          }
 
         /* Uses log to adjust the balances of the tree of each affected index */
-        if(useLog) {
-            for(size_t i=0; i < balanceLog.size(); ++i) {
+        if(useLog && createsNewDepth) {
+            for(size_t i=0; i < balanceLog.size() - 1; ++i) {
+                std::cout << "Log entry: " << balanceLog[i].first << " " << balanceLog[i].second << std::endl;
                 tree[balanceLog[i].first].balance += balanceLog[i].second;
             }
+            //tree[balanceLog[balanceLog.size() - 1].first].balance += balanceLog[balanceLog.size() - 1].second;
+            std::cout << "Asdf" << std::endl;
         }
+        tree[balanceLog.back().first].balance += balanceLog.back().second;
     }
+
+    //rebalance();
 
     for(size_t i = 0; i < tree.size(); ++i) {
         std::cout << tree[i] << "\t";
@@ -116,8 +117,43 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
 
 }
 
-void avlBST::rebalance() {
 
+void avlBST::insertRoot(node &temp) {
+    tree.push_back(temp);
+    leftIdxs.push_back(-1);
+    rightIdxs.push_back(-1);
+    parentIdxs.push_back(-1);
+}
+
+void avlBST::insertLeft(node &temp, const int &index) {
+    leftIdxs[index] = (tree.size()); // size refers to index of the inserted node
+    leftIdxs.push_back(-1);
+    rightIdxs.push_back(-1);
+    parentIdxs.push_back(index);
+    tree.push_back(temp);
+}
+
+void avlBST::insertRight(node &temp, const int &index) {
+    rightIdxs[index] = (tree.size());
+    leftIdxs.push_back(-1);
+    rightIdxs.push_back(-1);
+    parentIdxs.push_back(index);
+    tree.push_back(temp);
+}
+
+void avlBST::rebalance() {
+    std::cout << "REBALANCED CALLED" << std::endl;
+    int risingIndex = tree.size() - 1;
+    while(parentIdxs[risingIndex] != -1) {
+        std::cout << "RISING Index is : " << risingIndex << std::endl;
+        std::cout << " | | Balance is : " << tree[risingIndex].balance << std::endl;
+        std::cout << "RIGHT IS ::: " << rightIdxs[risingIndex] << std::endl;
+        //if(tree[risingIndex].balance <= -2 && tree[risingIndex].word > tree.at(rightIdxs[risingIndex]).word) {
+        //    std::cout << "LEFT LEFT CASE!!!" << std::endl;
+        //}
+
+        risingIndex = parentIdxs[risingIndex];
+    }
 }
 
 void avlBST::clear() {
