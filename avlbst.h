@@ -41,6 +41,9 @@ private:
     void insertLeft(node &temp, const int &index);
     void insertRight(node &temp, const int &index);
 
+    void rotateRight(const int &index);
+    void rotateLeft(const int &index);
+
     void rebalance();
 };
 
