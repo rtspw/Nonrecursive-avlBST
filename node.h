@@ -10,6 +10,7 @@ struct node {
     std::string word;
     size_t count;
     int balance;
+    int height;
     std::vector<size_t> paragraphIndex;
     std::vector<size_t> lineIndex;
 
@@ -17,6 +18,7 @@ struct node {
         word = w;
         count = c;
         balance = 0;
+        height = 0;
         paragraphIndex.push_back(pIdx);
         lineIndex.push_back(lIdx);
     }
@@ -24,6 +26,7 @@ struct node {
         word = std::string();
         count = 0;
         balance = 0;
+        height = 0;
         paragraphIndex.clear();
         lineIndex.clear();
     }
@@ -31,6 +34,7 @@ struct node {
         word = other.word;
         count = other.count;
         balance = other.balance;
+        height = other.height;
         paragraphIndex = other.paragraphIndex;
         lineIndex = other.lineIndex;
     }
@@ -39,6 +43,7 @@ struct node {
             word = other.word;
             count = other.count;
             balance = other.balance;
+            height = other.height;
             paragraphIndex = other.paragraphIndex;
             lineIndex = other.lineIndex;
         }

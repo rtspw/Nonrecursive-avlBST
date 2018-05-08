@@ -1,7 +1,7 @@
 #include "node.h"
 
 std::ostream &operator<<(std::ostream &out, const node &n) {
-    out << "("<< n.word << "\t | Count: " << n.count << "\t | Balance: " << n.balance << ")";
+    out << "("<< n.word << "\t | Count: " << n.count << "\t | Balance: " << n.balance << "\t | Height: " << n.height << ")";
     return out;
 }
 

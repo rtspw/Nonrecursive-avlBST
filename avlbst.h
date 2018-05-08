@@ -37,6 +37,10 @@ private:
     void copy(const avlBST &other);
     void deleteAll();
 
+    int getBigger(const int &x, const int &y);
+    int getHeight(const int &x);
+    int getBalance(const int &x);
+
     void insertRoot(node &temp);
     void insertLeft(node &temp, const int &index);
     void insertRight(node &temp, const int &index);
