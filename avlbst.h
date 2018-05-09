@@ -13,8 +13,6 @@ class avlBST {
 
 public:
 
-    typedef void (avlBST::*fptr)(node*, int, std::vector<std::pair<size_t, int>>);
-
     avlBST();
     ~avlBST();
     avlBST(const avlBST &other);
@@ -38,15 +36,15 @@ private:
     void deleteAll();
 
     int getBigger(const int &x, const int &y);
-    int getHeight(const int &x);
-    int getBalance(const int &x);
+    int getHeight(const int &indexOfNode);
+    int getBalance(const int &indexOfNode);
 
     void insertRoot(node &temp);
     void insertLeft(node &temp, const int &index);
     void insertRight(node &temp, const int &index);
 
-    void rotateRight(const int &index);
-    void rotateLeft(const int &index);
+    void rotateRight(int index);
+    void rotateLeft(int index);
 
     void rebalance();
 };

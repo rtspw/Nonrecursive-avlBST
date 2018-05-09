@@ -1,10 +1,6 @@
 #include "avlbst.h"
-#include "utility"
 
-
-avlBST::avlBST() {
-
-}
+avlBST::avlBST() {}
 
 avlBST::~avlBST() {
     deleteAll();
@@ -30,9 +26,6 @@ size_t avlBST::size() {
     return tree.size();
 }
 
-
-
-
  // Concerns : vector.push_back creates copy
 void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx, const size_t count) {
     node temp(w, pIdx, lIdx, count);
@@ -41,10 +34,7 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
     }
     else {
         bool notBreak = true;
-        bool useLog = true;
-        bool createsNewDepth = false;
         int index = 0;
-        std::vector<std::pair<size_t, int>> balanceLog;
 
         /* Iterates down the tree, along with changing the balance of the nodes accordingly */
         while(notBreak) {
@@ -56,15 +46,11 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
                 tree[index].paragraphIndex.push_back(pIdx);
                 tree[index].lineIndex.push_back(lIdx);
                 notBreak = false;
-                useLog = false;
             }
 
             /* Case 2: Makes left children, which goes down until there is a -1 index */
             else if(temp.word < tree[index].word) {
-                balanceLog.push_back(std::make_pair(index, -1));
                 if(leftIdxs[index] == -1) {
-                    if(rightIdxs[index] == -1)
-                        createsNewDepth = true;
                     insertLeft(temp, index);
                     notBreak = false;
                 }
@@ -73,10 +59,7 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
 
             /* Case 3: Opposite of case 2 */
             else {
-                balanceLog.push_back(std::make_pair(index, 1));
                 if(rightIdxs[index] == -1) {
-                    if(leftIdxs[index] == -1)
-                        createsNewDepth = true;
                     insertRight(temp, index);
                     notBreak = false;
                 }
@@ -84,45 +67,25 @@ void avlBST::insert(const std::string &w, const size_t &pIdx, const size_t &lIdx
             }
          }
 
-        /* DEBUG!!!!
-         * Uses log to adjust the balances of the tree of each affected index
-         * However, only the last entry of the log is used if no new depth is made */
-        if(useLog) {
-            if(createsNewDepth) {
-                for(size_t i=0; i < balanceLog.size() - 1; ++i)
-                    tree[balanceLog[i].first].balance += balanceLog[i].second;
-            }
-
-        tree[balanceLog.back().first].balance += balanceLog.back().second;
-        }
-
         /* Starts from added node and modifies height values up to the root */
         while(index != -1) {
             tree[index].height = 1 + getBigger(getHeight(leftIdxs[index]), getHeight(rightIdxs[index]));
             index = parentIdxs[index];
         }
 
-        //rebalance();
+        /* Uses last entered node and finds and fixes imbalances */
+        rebalance();
     }
 
 
     for(size_t i = 0; i < tree.size(); ++i) {
-        std::cout << tree[i] << "\t";
-    }
-    std::cout << std::endl;
-    for(size_t i = 0; i < leftIdxs.size(); ++i) {
+        std::cout << i << "| (" << tree[i].word << "," << tree[i].count << ")\t";
         std::cout << leftIdxs[i] << "\t";
-    }
-    std::cout << std::endl;
-    for(size_t i = 0; i < rightIdxs.size(); ++i) {
         std::cout << rightIdxs[i] << "\t";
+        std::cout << parentIdxs[i];
+        std::cout << std::endl;
     }
     std::cout << std::endl;
-    for(size_t i = 0; i < parentIdxs.size(); ++i) {
-        std::cout << parentIdxs[i] << "\t";
-    }
-    std::cout << std::endl;
-    std::cout << getBalance(0) << std::endl;
     std::cout << std::endl;
 
 }
@@ -151,44 +114,25 @@ void avlBST::insertRight(node &temp, const int &index) {
     tree.push_back(temp);
 }
 
+/* When an imbalance is found, the subtree is rotated based on four cases */
 void avlBST::rebalance() {
     int risingIndex = tree.size() - 1;
     do {
         risingIndex = parentIdxs[risingIndex];
-        if(tree[risingIndex].balance <= -2 && tree[leftIdxs[risingIndex]].balance == -1) {
-            std::cout << "LEFT LEFT CASE!!!" << std::endl;
+        int balanceOfNode = getBalance(risingIndex);
+        if(balanceOfNode <= -2 && getBalance(leftIdxs[risingIndex]) == -1) {
             rotateRight(risingIndex);
         }
-        else if(tree[risingIndex].balance <= -2 && tree[leftIdxs[risingIndex]].balance == 1) {
-            std::cout << "LEFT RIGHT CASE!!!" << leftIdxs[risingIndex] << std::endl;
+        else if(balanceOfNode <= -2 && getBalance(leftIdxs[risingIndex]) == 1) {
             rotateLeft(leftIdxs[risingIndex]);
-
-            for(size_t i = 0; i < tree.size(); ++i) {
-                std::cout << tree[i] << "\t";
-            }
-            std::cout << std::endl;
-            for(size_t i = 0; i < leftIdxs.size(); ++i) {
-                std::cout << leftIdxs[i] << "\t";
-            }
-            std::cout << std::endl;
-            for(size_t i = 0; i < rightIdxs.size(); ++i) {
-                std::cout << rightIdxs[i] << "\t";
-            }
-            std::cout << std::endl;
-            for(size_t i = 0; i < parentIdxs.size(); ++i) {
-                std::cout << parentIdxs[i] << "\t";
-            }
-            std::cout << std::endl;
-
             rotateRight(risingIndex);
         }
-        else if(tree[risingIndex].balance >= 2 && tree[rightIdxs[risingIndex]].balance == -1) {
-            std::cout << "RIGHT LEFT CASE!!!" << std::endl;
+        else if(balanceOfNode >= 2 && getBalance(rightIdxs[risingIndex]) == -1) {
             rotateRight(rightIdxs[risingIndex]);
             rotateLeft(risingIndex);
+
         }
-        else if(tree[risingIndex].balance >= 2 && tree[rightIdxs[risingIndex]].balance == 1) {
-            std::cout << "RIGHT RIGHT CASE!!!" << std::endl;
+        else if(balanceOfNode >= 2 && getBalance(rightIdxs[risingIndex]) == 1) {
             rotateLeft(risingIndex);
         }
     } while(parentIdxs[risingIndex] != -1);
@@ -201,11 +145,18 @@ void avlBST::rebalance() {
  *   / \        /
  *  a  b       b
  */
-void avlBST::rotateRight(const int &index) {
+void avlBST::rotateRight(int index) {
 
+    // Updates nodes above pivot if exists
+    if(parentIdxs[index] != -1) {
+        if(leftIdxs[parentIdxs[index]] == index)
+            leftIdxs[parentIdxs[index]] = leftIdxs[index];
+        else
+            rightIdxs[parentIdxs[index]] = leftIdxs[index];
+    }
+
+    // Stores index of b before other indexes are modified
     int bIdx = rightIdxs[leftIdxs[index]];
-    tree[index].balance += 2;
-    ++tree[leftIdxs[index]].balance;
 
     // Sets parent of x as parent of y
     parentIdxs[leftIdxs[index]] = parentIdxs[index];
@@ -221,6 +172,12 @@ void avlBST::rotateRight(const int &index) {
     }
     else
         leftIdxs[index] = -1;
+
+    /* Starts from added node and modifies height values up to the root */
+    while(index != -1) {
+        tree[index].height = 1 + getBigger(getHeight(leftIdxs[index]), getHeight(rightIdxs[index]));
+        index = parentIdxs[index];
+    }
 }
 
 /* rotateLeft's variables:
@@ -230,10 +187,18 @@ void avlBST::rotateRight(const int &index) {
  *     /\       \
  *    b a        b
  */
-void avlBST::rotateLeft(const int &index) {
+void avlBST::rotateLeft(int index) {
+
+    // Stores index of b before other indexes are modified
     int bIdx = leftIdxs[rightIdxs[index]];
-    tree[index].balance -= 2;
-    --tree[rightIdxs[index]].balance;
+
+    // Updates nodes above pivot if exists
+    if(parentIdxs[index] != -1) {
+        if(leftIdxs[parentIdxs[index]] == index)
+            leftIdxs[parentIdxs[index]] = rightIdxs[index];
+        else
+            rightIdxs[parentIdxs[index]] = rightIdxs[index];
+    }
 
     // Sets parent of x as parent of y
     parentIdxs[rightIdxs[index]] = parentIdxs[index];
@@ -242,6 +207,7 @@ void avlBST::rotateLeft(const int &index) {
     // Sets left child of x as y
     leftIdxs[rightIdxs[index]] = index;
 
+
     // If b exists, sets parent of b as y
     if(bIdx != -1) {
         parentIdxs[bIdx] = index;
@@ -249,28 +215,32 @@ void avlBST::rotateLeft(const int &index) {
     }
     else
         rightIdxs[index] = -1;
+
+    /* Starts from added node and modifies height values up to the root */
+    while(index != -1) {
+        tree[index].height = 1 + getBigger(getHeight(leftIdxs[index]), getHeight(rightIdxs[index]));
+        index = parentIdxs[index];
+    }
 }
 
 void avlBST::clear() {
-    tree.clear();
-    leftIdxs.clear();
-    rightIdxs.clear();
-    parentIdxs.clear();
+    deleteAll();
 }
 
-// Get height insures we can get the height even when the node does not exist
-int avlBST::getHeight(const int &x) {
-    return (x == -1) ? 0 : tree[x].height;
-}
 
 // Gets the larger of two numbers
 int avlBST::getBigger(const int &x, const int &y) {
     return (x > y) ? x : y;
 }
 
+// Get height insures we can get the height even when the node does not exist
+int avlBST::getHeight(const int &indexOfNode) {
+    return (indexOfNode == -1) ? 0 : tree[indexOfNode].height;
+}
+
 // Calculates balance factor of node
-int avlBST::getBalance(const int &x) {
-    return (x == -1) ? 0 : getHeight(rightIdxs[x])  - getHeight(leftIdxs[x]);
+int avlBST::getBalance(const int &indexOfNode) {
+    return (indexOfNode == -1) ? 0 : getHeight(rightIdxs[indexOfNode])  - getHeight(leftIdxs[indexOfNode]);
 }
 
 void avlBST::copy(const avlBST &other) {

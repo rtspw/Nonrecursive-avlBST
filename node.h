@@ -17,7 +17,6 @@ struct node {
     node(const std::string &w = std::string(), const size_t &pIdx = 0, const size_t &lIdx = 0, size_t c = 1) {
         word = w;
         count = c;
-        balance = 0;
         height = 0;
         paragraphIndex.push_back(pIdx);
         lineIndex.push_back(lIdx);
@@ -25,7 +24,6 @@ struct node {
     ~node() {
         word = std::string();
         count = 0;
-        balance = 0;
         height = 0;
         paragraphIndex.clear();
         lineIndex.clear();
@@ -33,7 +31,6 @@ struct node {
     node(const node &other) {
         word = other.word;
         count = other.count;
-        balance = other.balance;
         height = other.height;
         paragraphIndex = other.paragraphIndex;
         lineIndex = other.lineIndex;
@@ -42,7 +39,6 @@ struct node {
         if(this != &other) {
             word = other.word;
             count = other.count;
-            balance = other.balance;
             height = other.height;
             paragraphIndex = other.paragraphIndex;
             lineIndex = other.lineIndex;
